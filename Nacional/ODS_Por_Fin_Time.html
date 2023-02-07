@@ -1,0 +1,108 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<head>
+   <title>ODS Ecuador</title>
+   <!-- <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet"> -->
+</head>
+
+<script src="./js/d3.js"></script>
+<script src="./js/d3plus.js"></script>
+<script src="./js/topojson.js"></script>
+<script src="./js/d3.v3.min.js"></script>
+<script src="./js/queue.v1.min.js"></script>
+<script src="./js/topojson.v1.min.js"></script>
+<script src="./js/d3.tip.v0.6.3.js"></script>
+
+<style>
+
+body {
+  margin: 1px; padding:2%;
+}
+
+</style>
+
+<body>
+
+<div class="page">
+  <div id="viz-container">
+    <div class="single_viz" id="treemap">
+      <!-- <div class="text">
+        Transacciones por Industria
+        <p>Write any text here </p>
+      </div> -->
+      <div class="chart" id="svg_treemap"></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// instantiate our D3plus viz object
+var viz = d3plus.viz()
+// here we get all the data we need from the server, firt the raw data, then
+// each of the attribute files
+
+d3.tsv("./n5.tsv", function(error2, n5x) {
+  if (error2) return console.error(error2);
+  console.log(n5x);
+
+  d3.tsv("./n4.tsv", function(error2, n4x) {
+    if (error2) return console.error(error2);
+    console.log(n4x);
+
+  d3.tsv("./n2.tsv", function(error2, n2x) {
+    if (error2) return console.error(error2);
+    console.log(n2x);
+
+    d3.tsv("./n1.tsv", function(error1, n1x) {
+      if (error1) return console.error(error1);
+      console.log(n1x);
+
+      d3.tsv("./data.tsv", function(error, ecuador) {
+        if (error) return console.error(error);
+        console.log(ecuador);
+        // Coerce data values to be numeric
+        ecuador.forEach(function(d) {
+          d.codificado = +d.codificado
+          d.devengado = +d.devengado
+          d.proyectos = +d.count;
+        });
+        console.log(ecuador);
+
+        var attrs = {"n1": n1x, "n2": n2x, "n4": n4x, "n5": n5x}
+        console.log(attrs);
+
+        // set attributes on our viz object
+        var visualization = d3plus.viz()
+        .container("#svg_treemap")
+        .messages({"branding":true})
+        .data(ecuador)
+        .attrs(attrs)
+        .type("stacked")
+        .id(["n4", "n1", "n2", "n5"])
+        .text({"n1":"n1_descripcion","n2":"n2_descripcion", "n4":"n4_descripcion", "n5":"n5_descripcion"})
+        .y("devengado")
+        .x("year")
+        // .labels({"align": "left", "valign": "top"})
+        .depth(0)
+        .time("year")
+        .time({fixed: false})
+        .shape({"interpolate":"monotone"})
+        .ui([
+          {
+            "method" : "size",
+            "value"  : ["codificado", "devengado" , "proyectos"]
+          }
+        ])
+        .draw()
+        })
+      })
+    })
+  })
+})
+
+
+</script>
+
+</body>
